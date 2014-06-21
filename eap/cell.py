@@ -116,8 +116,9 @@ def get_coords():
     return coords
 
 def get_seg_coords():
-    nchars = 12
+    nchars = 40
     total_segs = get_nsegs()
+   
     coords = np.zeros(total_segs,
                       dtype=[("x0", np.float32),
                              ("y0", np.float32),
@@ -129,6 +130,7 @@ def get_seg_coords():
                              ("diam", np.float32),
                              ("name", "|S%d" % nchars)
                             ])
+                            
     j = 0
     for sec in h.allsec():
         nseg = sec.nseg
@@ -138,7 +140,7 @@ def get_seg_coords():
         names = np.repeat(sec.name()[:nchars], nseg).astype("|S%d"%nchars)
 
         seg_x = np.arange(nseg+1)*1./nseg
-
+        
         x_coord, y_coord, z_coord = get_locs_coord(sec, seg_x)
       
 
