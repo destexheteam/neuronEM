@@ -50,7 +50,7 @@ def logcontour(xx, yy, zz, n_contours=10):
     cs = plt.contour(xx, yy, zz, levs, norm=colors.LogNorm() )
     plt.clabel(cs, cs.levels, fmt=fmt, inline=1)
 
-def plot_multiplies(xx, yy, vv, t=None, w=0.1, h=0.1, sharey=True):
+def plot_multiplies(xx, yy, vv, t=None, w=0.1, h=0.1, sharey=True, color = 'k'):
     """Plot small mutiplies of potential  on a grid
     
     * w, h -- multiplies width/height in axes coords.
@@ -87,7 +87,7 @@ def plot_multiplies(xx, yy, vv, t=None, w=0.1, h=0.1, sharey=True):
                               sharey=last_inset if sharey else None, 
                               sharex=last_inset)
             last_inset.set_axes_locator(axes_locator(xx[i,j],yy[i,j]))
-            l, = plt.plot(t, vv[:,i,j], 'k-')
+            l, = plt.plot(t, vv[:,i,j], color+'-')
             plt.xticks([])
             plt.yticks([])
             ax_inset.append(last_inset)
