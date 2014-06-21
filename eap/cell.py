@@ -6,23 +6,56 @@ import numpy as np
 
 h = neuron.h
 
-def integrate(tstop, i_axial=False):
+def integrate(tstop, i_axial=False, neuron_cells = None):
     """Run Neuron simulation and return time and 2d array of 
     transmembrane currents (n_pts x n_segs). If i_axial is true
-    return in addition axial currents"""
+    return in addition axial currents.
+    For particular cell in the network, pass the cell as neuron_cell,
+    if for all the cells in the network leave it None"""
+
     i_membrane_all = []
     i_axial_all = [] 
+    
+    if neuron_cells != None:      
+        for idx_cell in range(len(neuron_cells)):
+            i_membrane_all.append([]) 
+            i_axial_all.append([])  
+    
+    li = []
+    #for i in xrange(numcells):
+    #    li.append( np.array( tstop/h.dt, neuron_cells[i].all ) 
+        
     while h.t < tstop:
         h.fadvance()
-        v = get_i_membrane()
-        i_membrane_all.append(v)
+        if neuron_cells ==None:
+            v = get_for_all(get_i_membrane)
+            i_membrane_all.append(v)
+        else:
+            v = []
+            for idx_cell, next_cell in enumerate(neuron_cells):
+                v_next = get_bycell(get_i_membrane, next_cell)
+                i_membrane_all[idx_cell].append(v_next)
+                
         if i_axial:
-            iax = get_i_axial()
-            i_axial_all.append(iax)
-    t = np.arange(0, len(i_membrane_all))*h.dt
+            if neuron_cells ==None:
+                iax = get_for_all(get_i_axial)
+                i_axial_all.append(iax)
+            else:
+                iax = []
+                for idx_cell, next_cell in enumerate(neuron_cells): 
+                    iax_next = get_bycell(get_i_axial, next_cell)
+                    i_axial_all[idx_cell].append(iax_next) 
+                       
+    if neuron_cells == None:
+        t = np.arange(0, len(i_membrane_all))*h.dt
+    else:
+        t = np.arange(0, len(i_membrane_all[0]))*h.dt
+        
     if i_axial:
+        
         return t, np.array(i_membrane_all), np.array(i_axial_all)
     else:
+    
         return t, np.array(i_membrane_all)
 
 def insert_extracellular():
@@ -36,33 +69,48 @@ def get_v():
             v.append(seg.v)
     return v
 
-def get_i_membrane():
-    v = []
-    for sec in h.allsec():
-        i_sec = [seg.i_membrane for seg in sec]
-        x = [seg.x for seg in sec]
-        #add currents from point processes at the beginning and end of section
-        c_factor = 100 #from  [i/area]=nA/um2 to [i_membrane]=mA/cm2
-        area0 = h.area(x[0], sec=sec)
-        area1 = h.area(x[-1], sec=sec)
-        i_sec[0] += sum(pp.i for pp in sec(0).point_processes())/area0*c_factor
-        i_sec[-1] += sum(pp.i for pp in sec(1).point_processes())/area1*c_factor
-        v += i_sec
-    return v
 
-def get_i_axial():
+def get_bycell(func, neuron_cell):
+    """loops through all the segments of given cell
+    and calculates the given function for each segment"""
+    variable = []
+
+    for sec in neuron_cell.all:
+        #print sec.name()
+        variable = func(variable, sec)
+    return variable
+
+def get_for_all(func):
+    """loops through all the segments of all the cells
+    and calculates the given function for each segment"""
+    variable = []
+    for sec in h.allsec():
+        variable = func(variable, sec)
+    return variable
+
+def get_i_membrane(v, sec):
+    i_sec = [seg.i_membrane for seg in sec]
+    x = [seg.x for seg in sec]
+    #add currents from point processes at the beginning and end of section
+    c_factor = 100 #from  [i/area]=nA/um2 to [i_membrane]=mA/cm2
+    area0 = h.area(x[0], sec=sec)
+    area1 = h.area(x[-1], sec=sec)
+    i_sec[0] += sum(pp.i for pp in sec(0).point_processes())/area0*c_factor
+    i_sec[-1] += sum(pp.i for pp in sec(1).point_processes())/area1*c_factor
+    v += i_sec
+    return v    
+
+def get_i_axial(currents, sec):
     """return axial current density in mA/cm2"""
-    currents = []
-    for sec in h.allsec():
-        v0 = sec(0).v
-        for seg in sec:
-            v1 = seg.v
-            l = sec.L/sec.nseg #length in um
-            r = sec.Ra #resistance in ohm*cm
-            iax = (v1-v0)/(r*l*1e-4)
-            currents.append(iax)
-            v0 = v1
-
+    #for sec in h.allsec():
+    v0 = sec(0).v
+    for seg in sec:
+       v1 = seg.v
+       l = sec.L/sec.nseg #length in um
+       r = sec.Ra #resistance in ohm
+       iax = (v1-v0)/(r*l*1e-4)
+       currents.append(iax)
+       v0 = v1
     return currents
 
 def get_nsegs():
