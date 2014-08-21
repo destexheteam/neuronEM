@@ -79,7 +79,7 @@ def get_bycell(func, neuron_cell):
         #print sec.name()
         variable = func(variable, sec)
     return variable
-
+    
 def get_for_all(func):
     """loops through all the segments of all the cells
     and calculates the given function for each segment"""
@@ -87,7 +87,7 @@ def get_for_all(func):
     for sec in h.allsec():
         variable = func(variable, sec)
     return variable
-
+    
 def get_i_membrane(v, sec):
     i_sec = [seg.i_membrane for seg in sec]
     x = [seg.x for seg in sec]
@@ -213,12 +213,11 @@ def get_locs_coord(sec, loc):
     x = np.array([h.x3d(i,sec) for i in range(n3d)])
     y = np.array([h.y3d(i,sec) for i in range(n3d)])
     z = np.array([h.z3d(i,sec) for i in range(n3d)])
-
     arcl = np.sqrt(np.diff(x)**2+np.diff(y)**2+np.diff(z)**2)
     arcl = np.cumsum(np.concatenate(([0], arcl)))
     nseg = sec.nseg
     pt3d_x = arcl/arcl[-1]
-        
+       
     x_coord = np.interp(loc, pt3d_x, x)
     y_coord = np.interp(loc, pt3d_x, y)
     z_coord = np.interp(loc, pt3d_x, z)

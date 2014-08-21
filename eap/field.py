@@ -27,7 +27,7 @@ def hp_fir(N, cutoff, dt):
         
 def calc_v_ext(pos, coord,  I, eta=3.5):
     """
-    conductivity [eta] = Ohm.m
+    resistivity [eta] = Ohm.m
     segments coordinates [coord] = um
     measurement position [pos] = um
     membrane current density [I] = mA/cm2 
@@ -80,7 +80,7 @@ def estimate_lsa(pos, coord, I, eta=3.5):
     v_ext = v_ext*1E6 # nV
     return v_ext.sum(1)
 
-def estimate_on_grid(coords, I, XX, YY, z=0):
+def estimate_on_grid(coords, I, XX, YY, z=0, eta=3.5):
     """Estimate field on a grid.
     
     Arguments:
@@ -101,7 +101,7 @@ def estimate_on_grid(coords, I, XX, YY, z=0):
     v = np.zeros((ts, xs, ys))
     for i in range(xs):
         for j in range(ys):
-            v_ext = estimate_lsa((XX[i,j], YY[i,j], z), coords, I)
+            v_ext = estimate_lsa((XX[i,j], YY[i,j], z), coords, I, eta)
             v[:, i,j] = v_ext
 
     return v
