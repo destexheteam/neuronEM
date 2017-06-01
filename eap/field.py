@@ -68,7 +68,9 @@ def estimate_lsa(pos, coord, I, eta=3.5):
     r, d  = _cylindric_coords(pt1, pt2, pos)
     #l = _vlen(pt1-pt2)
     l = coord['L']
+
     assert (r>=0).all()
+
     I = I*1.E4*np.pi*diam*1E-6
     C = 1./(4*np.pi)*eta
     #v_ext = C*I*np.log(np.abs(r**2+(d+l)**2)/np.abs(r**2+d**2))/2.

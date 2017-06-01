@@ -7,7 +7,7 @@ from matplotlib import cm, collections, transforms, colors, ticker
 import field
 
 def plot_neuron(coords, scalar=None, colors=None,
-                norm=colors.Normalize(), cmap=cm.jet, show_diams=False, width_min=0.5, width_max=5):
+                norm=colors.Normalize(), cmap=cm.jet, show_diams=False, width_min=0.5, width_max=5,autolim=True):
    
     a = plt.gca()
     line_segs = [[(c['x0'], c['y0']), (c['x1'], c['y1'])] for c in
@@ -22,7 +22,7 @@ def plot_neuron(coords, scalar=None, colors=None,
         widths = None
     
     col = collections.LineCollection(line_segs, cmap=cmap, norm=norm, linewidths=widths)
-    a.add_collection(col, autolim=True)
+    a.add_collection(col, autolim=autolim)
     if scalar is not None:
         col.set_array(scalar)
     else:

@@ -76,7 +76,6 @@ def get_bycell(func, neuron_cell):
     variable = []
 
     for sec in neuron_cell.all:
-        #print sec.name()
         variable = func(variable, sec)
     return variable
     
@@ -160,7 +159,6 @@ def get_coords():
 
         j+=nseg
 
-
     return coords
 
 def get_seg_coords():
@@ -209,15 +207,16 @@ def get_seg_coords():
 
 def get_locs_coord(sec, loc):
     """get 3d coordinates of section locations"""
-    n3d = int(h.n3d(sec))
-    x = np.array([h.x3d(i,sec) for i in range(n3d)])
-    y = np.array([h.y3d(i,sec) for i in range(n3d)])
-    z = np.array([h.z3d(i,sec) for i in range(n3d)])
+    n3d = int(h.n3d(sec=sec))
+
+    x = np.array([h.x3d(i, sec=sec) for i in range(n3d)])
+    y = np.array([h.y3d(i, sec=sec) for i in range(n3d)])
+    z = np.array([h.z3d(i, sec=sec) for i in range(n3d)])
+
     arcl = np.sqrt(np.diff(x)**2+np.diff(y)**2+np.diff(z)**2)
     arcl = np.cumsum(np.concatenate(([0], arcl)))
     nseg = sec.nseg
     pt3d_x = arcl/arcl[-1]
-       
     x_coord = np.interp(loc, pt3d_x, x)
     y_coord = np.interp(loc, pt3d_x, y)
     z_coord = np.interp(loc, pt3d_x, z)
@@ -251,7 +250,7 @@ def get_point_processes():
     return point_processes
 
 def initialize(dt=0.025):
-    #insert_extracellular()
+    insert_extracellular()
     h.finitialize()
     h.dt = dt
     h.fcurrent()
@@ -261,4 +260,13 @@ def load_model(hoc_name, dll_name=None):
     if dll_name:
         h.nrn_load_dll(dll_name)
     h.load_file(hoc_name)
+
+def load_model_swc(filename_swc):
+    h.load_file("celbild.hoc")
+    h.load_file('import3d.hoc')
+
+    Import = h.Import3d_SWC_read()
+    Import.input(filename_swc)
+    imprt = h.Import3d_GUI(Import, 0)
+    imprt.instantiate(None)
 
