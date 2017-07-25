@@ -262,6 +262,7 @@ def load_model(hoc_name, dll_name=None):
     h.load_file(hoc_name)
 
 def load_model_swc(filename_swc):
+    '''loads morphology of the neuron from the swc file'''
     h.load_file("celbild.hoc")
     h.load_file('import3d.hoc')
 
