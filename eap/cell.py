@@ -271,3 +271,31 @@ def load_model_swc(filename_swc):
     imprt = h.Import3d_GUI(Import, 0)
     imprt.instantiate(None)
 
+def select_sec(coords, type):
+   # written by Francesca 
+    m = []
+    a=select_sections(coords, type)
+    
+    for i in range(len(a)):
+        if a[i] == True:
+            m.append(i)
+    #sezione = min(m)+(len(m)/2) #central segment,but it's arbitrary!
+    sezione = m
+    return sezione
+
+
+def select_sections(coords, type):
+    """Filter segments according to their name (taken from name field
+    in coords)
+
+    - type - regular expression that the name should match
+    """
+    import re
+    sec_type = np.zeros(len(coords), dtype=np.bool)
+    for i, name in enumerate(coords['name']):
+        if re.match(type, name) is not None:
+            sec_type[i] = True
+    return sec_type
+
+
+
