@@ -50,7 +50,7 @@ def integrate(tstop, i_axial=False, neuron_cells = None):
         t = np.arange(0, len(i_membrane_all))*h.dt
     else:
         t = np.arange(0, len(i_membrane_all[0]))*h.dt
-        
+
     if i_axial:
         
         return t, np.array(i_membrane_all), np.array(i_axial_all)
@@ -90,12 +90,19 @@ def get_for_all(func):
 def get_i_membrane(v, sec):
     i_sec = [seg.i_membrane for seg in sec]
     x = [seg.x for seg in sec]
+
     #add currents from point processes at the beginning and end of section
     c_factor = 100 #from  [i/area]=nA/um2 to [i_membrane]=mA/cm2
     area0 = h.area(x[0], sec=sec)
     area1 = h.area(x[-1], sec=sec)
     i_sec[0] += sum(pp.i for pp in sec(0).point_processes())/area0*c_factor
     i_sec[-1] += sum(pp.i for pp in sec(1).point_processes())/area1*c_factor
+    
+    for seg_idx, seg in enumerate(sec):
+        seg_area = seg.area()
+        electrode_current = sum(pp.i for pp in seg.point_processes())/seg_area*c_factor
+        i_sec[seg_idx] -= electrode_current
+    
     v += i_sec
     return v    
 
@@ -174,7 +181,8 @@ def get_seg_coords():
                              ("z1", np.float32),
                              ("L", np.float32),
                              ("diam", np.float32),
-                             ("name", "|S%d" % nchars)
+                             ("name", "|S%d" % nchars)#,
+			    # ("loc", np.float32)
                             ])
                             
     j = 0
@@ -201,7 +209,18 @@ def get_seg_coords():
         coords['diam'][j:j+nseg] = diams
         coords['L'][j:j+nseg] = lengths
         coords['name'][j:j+nseg] = names 
+
+        #print len(np.arange(nseg+1)), nseg, len(seg_x), len(coords['x0'][j:j+nseg])
+        #print 
+	    #coords['loc'][j:j+nseg] = seg_x
         j+=nseg
+
+    # !!!! there is a problem with area calculations in NeuronEAP if segment has different radius 
+    # on the two edges. therefore we need the correction  
+    # the proper correction should come in the next version of NeuronEAP   
+    diams = [seg.diam for sec in h.allsec() for seg in sec]
+    coords['diam'] = diams
+    # !!!!! !!!!!
 
     return coords
 
