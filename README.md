@@ -1,4 +1,4 @@
-# NeuronEAP
+# neuronEM
 
 [![DOI](https://zenodo.org/badge/21384/btel/neuroneap.svg)](https://zenodo.org/badge/latestdoi/21384/btel/neuroneap)
 
